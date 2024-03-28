@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.nn.modules import GELU, LayerNorm, Module
 from torch.jit import Final
-from bitnet import BitLinear, BitFeedForward
+from bitnet_remaster import BitFeedForward, BitLinear
 import torch.nn.functional as F
 
 
@@ -117,7 +117,6 @@ class bitBlock(nn.Module):
         self.bitmlp = BitFeedForward(
             dim=dim,
             mult=mlp_ratio,
-            glu=bool(act_layer),
             dropout=proj_drop,
         )
 
@@ -127,6 +126,6 @@ class bitBlock(nn.Module):
         self.drop_path2 = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.drop_path1(self.ls1(self.attn(self.norm1(x))))
-        x = x + self.drop_path2(self.ls2(self.bitmlp(self.norm2(x))))
+        x = x + self.drop_path1(self.ls1(self.attn(x)))
+        x = x + self.drop_path2(self.ls2(self.bitmlp(x)))
         return x
